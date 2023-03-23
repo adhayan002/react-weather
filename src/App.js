@@ -1,40 +1,101 @@
-import React from 'react';
+import React, {useState} from "react";
 import {
   ChakraProvider,
   Box,
   Text,
+  Stack,
   Link,
   VStack,
   Code,
   Grid,
   theme,
-} from '@chakra-ui/react';
-import { ColorModeSwitcher } from './ColorModeSwitcher';
-import { Logo } from './Logo';
+  Heading,
+  Image,
+  StackDivider,
+} from "@chakra-ui/react";
+import { Input } from "@chakra-ui/react";
+import { Button, ButtonGroup } from "@chakra-ui/react";
+import { Center, Square, Circle } from "@chakra-ui/react";
+import { Card, CardHeader, CardBody, CardFooter } from "@chakra-ui/react";
+import { Divider } from "@chakra-ui/react";
 
 function App() {
+  const [weather, setWeather] = useState(null);
+  const [city, setCity] = useState("");
+  const [isLoad, setIsLoad] = useState(false);
+  const apiKey = "eb71b8579edb417f978dafaaa86fef93";
+
+  const apiCall = async () => {
+    if(city===""){
+      return;
+    }
+    setIsLoad(true);
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+    const res = await fetch(url);
+    if(!res.ok){
+      alert("Enter a Valid City Name")
+      setIsLoad(false);
+    }
+    const data = await res.json();
+    console.log(data);
+    setWeather({
+      descp: data.weather[0].description,
+      temp: Math.round(data.main.temp),
+      city: data.name,
+      humidity: data.main.humidity,
+      press: data.main.pressure,
+      icon: data.weather[0].icon,
+    });
+    setIsLoad(false);
+  };
+
   return (
-    <ChakraProvider theme={theme}>
-      <Box textAlign="center" fontSize="xl">
-        <Grid minH="100vh" p={3}>
-          <ColorModeSwitcher justifySelf="flex-end" />
-          <VStack spacing={8}>
-            <Logo h="40vmin" pointerEvents="none" />
-            <Text>
-              Edit <Code fontSize="xl">src/App.js</Code> and save to reload.
-            </Text>
-            <Link
-              color="teal.500"
-              href="https://chakra-ui.com"
-              fontSize="2xl"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learn Chakra
-            </Link>
-          </VStack>
-        </Grid>
-      </Box>
+    <ChakraProvider>
+      <Center marginTop={50} marginLeft={30}>
+        <div>
+          <Input
+            type="text"
+            placeholder="Enter city name"
+            onChange={(e) => setCity(e.target.value)}
+            maxWidth={200}
+            marginRight={3}
+          />
+          <Button
+            colorScheme="blue"
+            onClick={apiCall}
+            marginBottom={1}
+            isLoading={isLoad}
+          >
+            Submit
+          </Button>
+        </div>
+      </Center>
+      {weather && (
+        <>
+          <Center>
+            <Card marginTop={10} w={{ base: '200px', md: '350px', lg: '500px' }}>
+              <CardBody>
+                <Image
+                  src={`https://openweathermap.org/img/wn/${weather.icon}@2x.png`}
+                  alt="Weather Icon"
+                  borderRadius="lg"
+                />
+                <Stack mt="6" spacing="3">
+                  <Heading size="md">{weather.city}</Heading>
+                  <Text>Description:{weather.descp}</Text>
+                  <Text color="blue.600" fontSize="2xl">
+                    Temp:{weather.temp}°C
+                  </Text>
+                  <Text color="blue.600" fontSize="2xl">
+                    Humidity:{weather.humidity}
+                  </Text>
+                </Stack>
+              </CardBody>
+              <Divider />
+            </Card>
+          </Center>
+        </>
+      )}
     </ChakraProvider>
   );
 }
