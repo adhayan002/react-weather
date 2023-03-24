@@ -24,9 +24,20 @@ function App() {
   const [city, setCity] = useState("");
   const [isLoad, setIsLoad] = useState(false);
   const apiKey = "eb71b8579edb417f978dafaaa86fef93";
+  function containsOnlyNumbers(str) {
+    return /^[0-9]+$/.test(str);
+  }
+  function containsNumbers(str) {
+    return /\d/.test(str);
+  }
 
   const apiCall = async () => {
     if(city===""){
+      alert("Enter a city name!")
+      return;
+    }
+    if(containsNumbers(city)){
+      alert("Enter a valid city. Maybe u should try removing numeric instances")
       return;
     }
     setIsLoad(true);
